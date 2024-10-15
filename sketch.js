@@ -25,7 +25,9 @@ function preload() {
 function setup() {
   createCanvas(375, 812);
   mic = new p5.AudioIn();
-  mic.start();
+  mic.start(() => console.log('Microphone is ready.'));
+  getAudioContext().resume();
+  // mic.start();
   //getAudioContext().resume();
 
   angleMode(DEGREES);
