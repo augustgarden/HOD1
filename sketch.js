@@ -1,10 +1,13 @@
-let B, L, R, La, Lb, Lc, Ld, Le, Lf, M, Gf, Ga, Gb, Gc, Gd, Ge;
+let Bb, Bw, B, L, R, La, Lb, Lc, Ld, Le, Lf, M, Gf, Ga, Gb, Gc, Gd, Ge;
 let mic;
 let mode = 0;
 let micLevel =0;
 let audioContext;
 let micStarted = false;
 let curState = 1;
+let birdX = 190; // 초기 X 위치 (오른쪽 하단 시작)
+let birdY = 600; // 초기 Y 위치 (오른쪽 하단 시작)
+let birdSpeed = 2; // 이동 속도
 
 function preload() {
   B = loadImage('img/mount-B.png');
@@ -23,6 +26,8 @@ function preload() {
   Gd = loadImage('img/grass-d.png');
   Ge = loadImage('img/grass-e.png');
   Gf = loadImage('img/grass-f.png');
+  Bb = loadImage('img/bird-b.png');
+  Bw = loadImage('img/bird-w.png');
 }
 
 
@@ -54,7 +59,7 @@ function setup() {
 
 function draw(){
 
- 
+
   if(curState ==1) stage1();
   if(curState ==2) stage2();
   
@@ -73,7 +78,7 @@ function stage1(){
 function stage2(){
   micLevel = mic.getLevel();
 
-  mountain();
+  bird();
 
 //     if (frameCount % 180 == 0){
 //       mode++;
@@ -123,20 +128,22 @@ function mountain(){
   
   push();
     imageMode(CORNER);
-    translate(20,410);
-    rotate(value*2);
-    image(L, 0, 0-value*4);
+    translate(30,410);
+    rotate(-5+value*2);
+    image(L, 0, 0-value*10);
   pop();
-
   push();
-    rotate(0);
-    image(R, 270, 570+value-80);
+    imageMode(CORNER);
+    translate(185,420);
+    rotate(10+value*-2);
+    image(R, 0, 0+value-80);
   pop();
-
   push();
-    image(B, 190, 400-value*6-100);
+    image(B, 190, 420-value*6-100);
   pop();
+  //image(L, 170, 600-value*4-80);
 }
+
 
 
 
@@ -247,5 +254,35 @@ function grass(){
     translate(190, 290);
     rotate(value);
     image(Gf, 0, 0);
+  pop();
+}
+
+
+
+
+function bird() {
+  background('#54D778');
+  let value = micLevel * 50; // 소리 크기 기반 값
+  text(value, 50, 100);
+
+  // Bb 이미지 - 위아래로 진동 + 소리 크기에 따른 범위 확대
+  let bounce = sin(frameCount * 10) * (10 + value); // 진동 범위가 value에 따라 커짐
+
+  push();
+    imageMode(CENTER);
+    translate(170, 600 + bounce); // 진동 값을 더해 위아래 이동
+    image(Bb, 0, value * -40); 
+  pop();
+
+  // Bw 이미지 - 일정 각도 내에서 반복 회전 + 소리 크기에 따른 회전 속도
+  push();
+    imageMode(CORNER);
+    translate(190, 530+ bounce);
+
+    // 회전 각도 계산: -30도 ~ +30도 범위에서 진동
+    let angle = sin(frameCount * 5 * (1 + micLevel * 5)) * 15;
+    rotate(angle);
+
+    image(Bw, 0, value * -40);
   pop();
 }
