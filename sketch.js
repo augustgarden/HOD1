@@ -2,6 +2,9 @@ let B, L, R, La, Lb, Lc, Ld, Le, Lf, M, Gf, Ga, Gb, Gc, Gd, Ge;
 let mic;
 let mode = 0;
 let micLevel =0;
+let audioContext;
+let micStarted = false;
+let curState = 1;
 
 function preload() {
   B = loadImage('img/mount-B.png');
@@ -22,74 +25,117 @@ function preload() {
   Gf = loadImage('img/grass-f.png');
 }
 
-function setup() {
-  createCanvas(375, 812);
-  mic = new p5.AudioIn();
-  mic.start(() => console.log('Microphone is ready.'));
-  getAudioContext().resume();
-  // mic.start();
-  //getAudioContext().resume();
 
-  angleMode(DEGREES);
-  imageMode(CENTER);
+function startMic() {
+  if (!micStarted) {
+    getAudioContext().resume();
+    mic.start();
+  } else {
+    mic.stop();
+  }
+
+  micStarted = !micStarted;
 }
 
 
+function setup() {
+  createCanvas(375, 812);
+  mic = new p5.AudioIn();
+  mic.start();
+  getAudioContext().resume();
+
+  angleMode(DEGREES);
+  imageMode(CENTER);
+  startMicButton = createButton("Start Mic").position(20, 10).mousePressed(startMic);
+
+  audioContext = getAudioContext();
+}
 
 
 function draw(){
 
-  micLevel = mic.getLevel();
-  // mountain();
-  // larva();
-  // moon();
-  // grass();
-
-  if (frameCount % 180 == 0){
-      mode++;
-  }
-  if (mode == 0){
-      mountain();
-  }
-  else if (mode == 1){
-      larva();
-  }
-  else if (mode == 2){
-      grass();
-  }
-  else {
-      moon();
-  if(frameCount % 720 == 0) 
-      mode=0;
-  }
-
-  text(mouseX +' ' + mouseY, mouseX, mouseY);
+ 
+  if(curState ==1) stage1();
+  if(curState ==2) stage2();
+  
+  
 }
 
 
 
+function stage1(){
+  background(200);
+  image(M,150,200);
+
+}
+
+
+function stage2(){
+  micLevel = mic.getLevel();
+
+  mountain();
+
+//     if (frameCount % 180 == 0){
+//       mode++;
+//   }
+//   if (mode == 0){
+//       mountain();
+//   }
+//   else if (mode == 1){
+//       larva();
+//   }
+//   else if (mode == 2){
+//     grass();
+// }
+//   else {
+//       moon();
+//   if(frameCount % 720 == 0) 
+//       mode=0;
+//   }
+
+  text(mouseX +' ' + mouseY, mouseX, mouseY);
+
+  console.log(micLevel);
+  startMicButton.hide();
+}
+
+
+function mousePressed() {
+  if (
+    mouseX > 0 &&
+    mouseX < windowWidth &&
+    mouseY > 0 &&
+    mouseY < windowHeight
+  ) {
+    
+    curState = 2;
+    let fs = fullscreen();
+    fullscreen(!fs);
+  }
+  
+}
 
 function mountain(){
   background('#C9E5FF');
+
   let value = map(micLevel, 0,1,0,100);
   text(value,50,100);
   
   push();
     imageMode(CORNER);
-    translate(30,410);
-    rotate(-5+value*2);
-    image(L, 0, 0-value*10);
+    translate(20,410);
+    rotate(value*2);
+    image(L, 0, 0-value*4);
   pop();
+
   push();
-    imageMode(CORNER);
-    translate(185,420);
-    rotate(10+value*-2);
-    image(R, 0, 0+value-80);
+    rotate(0);
+    image(R, 270, 570+value-80);
   pop();
+
   push();
-    image(B, 190, 420-value*6-100);
+    image(B, 190, 400-value*6-100);
   pop();
-  //image(L, 170, 600-value*4-80);
 }
 
 
@@ -97,6 +143,7 @@ function mountain(){
 
 function larva(){
   background('#76D4E0');
+ 
   let value = micLevel*30;
   text(value,50,100);
   
@@ -111,18 +158,12 @@ function larva(){
 }
 
 
+
+
 function moon(){
   background('#373640');
   let value = micLevel*30;
   text(value,50,100);
-  
-  // push();
-  //   translate(130,180);
-  //   let angle = frameCount * 0.1;
-  //   rotate(angle);
-  //   tint(255, 100+value*50);
-  //   image(M, 0, 0);
-  // pop();
   
   push();
     let angle = frameCount * 0.1;
